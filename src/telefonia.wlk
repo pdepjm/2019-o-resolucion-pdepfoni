@@ -185,6 +185,12 @@ class Consumo {
 
 	method cubirtoPorOfertaCredito(cantidadCredito) = cantidadCredito > self.costo()
 
+	method cubiertoPorInternetEnElFinde() = false
+
+	method cubiertoPorOfertaMB(cantidadMBOferta) = false
+
+	method cubiertoPorLlamadasGratis() = false
+
 }
 
 class MBsDeInternet inherits Consumo {
@@ -195,11 +201,9 @@ class MBsDeInternet inherits Consumo {
 
 	override method costo() = cantidadMB * pdepfoni.costoMB()
 
-	method cubiertoPorOfertaMB(cantidadMBOferta) = cantidadMB < cantidadMBOferta
+	override method cubiertoPorOfertaMB(cantidadMBOferta) = cantidadMB < cantidadMBOferta
 
-	method cubiertoPorInternetEnElFinde() = new Date().internalDayOfWeek() > 5
-
-	method cubiertoPorLlamadasGratis() = false
+	override method cubiertoPorInternetEnElFinde() = new Date().internalDayOfWeek() > 5
 
 }
 
@@ -211,13 +215,9 @@ class MinutosDeLinea inherits Consumo {
 
 	method cantidadMinutos() = cantidadMinutos
 
-	method cubiertoPorOfertaMB(cantidadMBOferta) = false
-
-	method cubiertoPorInternetEnElFinde() = false
-
 	override method costo() = cantidadMinutos * pdepfoni.costoMinuto()
 
-	method cubiertoPorLlamadasGratis() = true
+	override method cubiertoPorLlamadasGratis() = true
 
 }
 
