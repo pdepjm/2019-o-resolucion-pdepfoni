@@ -23,7 +23,7 @@ describe "Consumos" {
 }
 
 
-describe "ofertas" {
+describe "packs" {
 
 
 	test "credito puede satisfacer consumo de llamada" {
@@ -34,15 +34,23 @@ describe "ofertas" {
 		assert.that(packCredito.puedeSatisfacer(consumoInternet))
 	}
 	
-	test "MB libres no puede satisfacer consumo de internet"{
+	test "MB libres no puede satisfacer consumo de internet" {
 		assert.notThat(packMBLibres.puedeSatisfacer(consumoLlamada))
 	}
 	
-	test "MB libres puede satisfacer consumo de internet"{
+	test "MB libres puede satisfacer consumo de internet" {
 		assert.that(packMBLibres.puedeSatisfacer(consumoInternet))
 	}
 	
+	test "pack vencido no puede satisfacer consumo" {
+		assert.notThat(packLlamadasGratisVencido.puedeSatisfacer(consumoLlamada))
+	}
 
+	test "pack gastado no puede satisfacer consumo" {
+		packMBLibres.consumir(consumoInternet)
+		packMBLibres.consumir(consumoInternet)
+		assert.notThat(packMBLibres.puedeSatisfacer(consumoInternet))
+	}
 }
 
 describe "lineas"{
