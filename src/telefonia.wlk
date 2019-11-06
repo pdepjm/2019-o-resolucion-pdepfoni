@@ -1,45 +1,37 @@
-object pdepfoni {
-
-	method costoMB() = 0.1
-
-	method costoMinuto() = 4
-
-}
-
 class Linea {
 
-	var plan
-	var packs
-	var consumos = []
+	const packs = []
+	const consumos = []
 	var tipoLinea = comun
 	var deuda = 0
 
-	method costoConsumo(consumo) = consumo.costo()
+	method gastoMBUltimoMes() = self.gastosEntre(new Date().minusDays(3), new Date()).sum({ consumo => consumo.cantidadMB() })
+
+	method gastosEntre(min, max) = consumos.filter({ consumo => consumo.consumidoEntre(min, max) })
+
+	method promedioConsumos() = consumos.sum({ consumo => consumo.costo() }) / consumos.size()
 
 	method agregarPack(nuevoPack) {
 		packs.add(nuevoPack)
 	}
 
-	method planYPacks() = plan + packs
-
-	method sePuedeRealizarConsumo(consumo) = self.planYPacks().anyOne({ conjuntoOfertas => conjuntoOfertas.cubreConsumo(consumo) })
+	method sePuedeRealizarConsumo(consumo) = packs.any({ pack => pack.puedeSatisfacer(consumo) })
 
 	method realizarConsumo(consumo) {
-		var cubridorDeConsumo = self.planYPacks().reverse().findOrElse({ conjuntoOfertas => conjuntoOfertas.cubreConsumo() }, { tipoLinea.accionConsumoNoRealizable(self) })
-		cubridorDeConsumo.restarConsumo(consumo)
-		consumos.add(new ConsumoRealizado(consumo = consumo, fechaConsumo = new Date()))
+		if (not self.sePuedeRealizarConsumo(consumo)) 
+			tipoLinea.accionConsumoNoRealizable(self, consumo) 
+		else 
+			self.consumirPack(consumo)
 	}
 
-	method limpiezaPacks() { // deprecado xd
-		packs.removeAllSuckThat({ pack => pack.esInutil()})
+	method consumirPack(consumo) {
+		var pack = packs.reverse().find({ pack => pack.puedeSatisfacer(consumo) })
+		pack.consumir(consumo)
+		consumos.add(consumo)
 	}
 
-	method gastosEnElMes() = consumos.filter({ consumo => consumo.consumidoEnElMes() }).map({ consumo => consumo.cantidadMB() })
-
-	method promedioConsumos() = consumos.sum({ consumo => consumo.costo() }) / consumos.size()
-
-	method cambioTipoLinea(nuevoTipo) {
-		tipoLinea = nuevoTipo
+	method limpiezaPacks() {
+		packs.removeAllSuchThat({ pack => pack.esInutil()})
 	}
 
 	method sumarDeuda(cantidadDeuda) {
@@ -50,174 +42,24 @@ class Linea {
 
 object platinum {
 
-	method accionConsumoNoRealizable(linea, costoConsumo) {
-		linea.sumarDeuda(costoConsumo)
+	method accionConsumoNoRealizable(linea, consumo) {
+		linea.sumarDeuda(consumo.costo())
 	}
 
 }
 
 object black {
 
-	method accionConsumoNoRealizable(linea, costoConsumo) {
+	method accionConsumoNoRealizable(linea, consumo) {
 	}
 
 }
 
 object comun {
 
-	method accionConsumoNoRealizable(linea, costoConsumo) {
-		self.error("Ninguna oferta cubre el consumo y no se me ocurre ninguna manera graciosa de informarlo.")
+	method accionConsumoNoRealizable(linea, consumo) {
+		self.error("Los packs de la línea no pueden cubrir el consumo.")
 	}
-
-}
-
-class ConsumoRealizado {
-
-	var consumo
-	var fechaConsumo
-
-	method consumidoEnElMes() = new Date() - fechaConsumo < 30
-
-	method cantidadMB() = consumo.cantidadMB()
-
-	method costo() = consumo.costo()
-
-}
-
-//planes y packs
-class Plan {
-
-	var ofertas
-
-	method cubreConsumo(consumo) = ofertas.anyOne({ oferta => oferta.satisfaceConsumo(consumo) })
-
-}
-
-class Pack inherits Plan {
-
-	var vencimiento = new Date()
-
-	method esInutil() = self.vencido() || ofertas.all({ oferta => oferta.acabado() })
-
-	method vencido() = vencimiento < new Date()
-
-	override method cubreConsumo(consumo) = super(consumo) && self.vencido()
-
-}
-
-//Ofertas
-class OfertaFinita {
-
-	var cantidad
-	var tipoOfertaFinita = normal
-
-	method resta(consumo)
-
-	method restarConsumo(consumo) {
-		cantidad -= tipoOfertaFinita.cuantoResta(self.resta(consumo))
-	}
-
-	method acabado() = cantidad <= 0
-
-}
-
-class Credito inherits OfertaFinita {
-
-	override method resta(consumo) = consumo.costo()
-
-	method satisfaceConsumo(consumo) = consumo.cubirtoPorOfertaCredito(cantidad)
-
-}
-
-class MBsLibres inherits OfertaFinita {
-
-	override method resta(consumo) = consumo.cantidadMB()
-
-	method satisfaceConsumo(consumo) = consumo.cubiertoPorOfertaMB(cantidad)
-
-}
-
-class Descuento {
-
-	var porcentaje
-
-	method cuantoResta(cantidadOriginal) = cantidadOriginal - cantidadOriginal * porcentaje
-
-}
-
-object suerte {
-
-	method cuantoResta(cantidadOriginal) = if (0.randomUpTo(1) > 0.2) cantidadOriginal else 0
-
-}
-
-object normal {
-
-	method cuantoResta(cantidadOriginal) = cantidadOriginal
-
-}
-
-class OfertaInfinita {
-
-	method restarConsumo(consumo) {
-	}
-
-	method acabado() = false
-
-}
-
-object internetLibreLosFindes inherits OfertaInfinita {
-
-	method satisfaceConsumo(consumo) = consumo.cubiertoPorInternetEnElFinde()
-
-}
-
-object llamadasGratis inherits OfertaInfinita {
-
-	method satisfaceConsumo(consumo) = consumo.cubiertoPorLlamadasGratis()
-
-}
-
-//Consumos
-class Consumo {
-
-	method costo()
-
-	method cubirtoPorOfertaCredito(cantidadCredito) = cantidadCredito > self.costo()
-
-	method cubiertoPorInternetEnElFinde() = false
-
-	method cubiertoPorOfertaMB(cantidadMBOferta) = false
-
-	method cubiertoPorLlamadasGratis() = false
-
-}
-
-class MBsDeInternet inherits Consumo {
-
-	var cantidadMB
-
-	method cantidadMB() = cantidadMB
-
-	override method costo() = cantidadMB * pdepfoni.costoMB()
-
-	override method cubiertoPorOfertaMB(cantidadMBOferta) = cantidadMB < cantidadMBOferta
-
-	override method cubiertoPorInternetEnElFinde() = new Date().internalDayOfWeek() > 5
-
-}
-
-class MinutosDeLinea inherits Consumo {
-
-	var cantidadMinutos
-
-	method cantidadMB() = 0
-
-	method cantidadMinutos() = cantidadMinutos
-
-	override method costo() = cantidadMinutos * pdepfoni.costoMinuto()
-
-	override method cubiertoPorLlamadasGratis() = true
 
 }
 

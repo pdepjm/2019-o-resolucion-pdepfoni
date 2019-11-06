@@ -1,47 +1,49 @@
 import telefonia.*
+import consumos.*
 
-describe "costos" {
 
-	test "minutos linea" {
-		var consumoMinutos = new MinutosDeLinea(cantidadMinutos = 3)
-		assert.equals(12, consumoMinutos.costo())
+describe "Consumos" {
+	const consumoLlamada = new ConsumoLlamada(segundos = 150)
+	const consumoInternet = new ConsumoInternet(cantidadMB = 5)
+
+	test "llamadas" {
+		assert.equals(6.50, consumoLlamada.costo())
 	}
 
 	test "MB internet" {
-		var consumoInternet = new MBsDeInternet(cantidadMB = 5)
 		assert.equals(0.5, consumoInternet.costo())
 	}
 
 }
-
-describe "ofertas" {
-
-	var consumoInternet = new MBsDeInternet(cantidadMB = 5)
-	var consumoMinutos = new MinutosDeLinea(cantidadMinutos = 3)
-	var ofertaCredito = new Credito(cantidad = 100)
-
-	test "credito cubre consumos minutos " {
-		assert.that(ofertaCredito.satisfaceConsumo(consumoMinutos))
-		
-	}
-
-	test "credito cubre consumos internet" {
-		assert.that(ofertaCredito.satisfaceConsumo(consumoInternet))
-	}
-	
-	test "llamdas gratis"{
-		assert.that(llamadasGratis.satisfaceConsumo(consumoMinutos))
-	}
-	
-	test "llamdas gratis no cubre internet"{
-		assert.notThat(llamadasGratis.satisfaceConsumo(consumoInternet))
-	}
-	
-
-}
-
-describe "lineas"{
-	
-		
-}
-
+//
+//describe "ofertas" {
+//
+//	var consumoInternet = new MBsDeInternet(cantidadMB = 5)
+//	var consumoMinutos = new MinutosDeLinea(cantidadMinutos = 3)
+//	var ofertaCredito = new Credito(cantidad = 100)
+//
+//	test "credito cubre consumos minutos " {
+//		assert.that(ofertaCredito.satisfaceConsumo(consumoMinutos))
+//		
+//	}
+//
+//	test "credito cubre consumos internet" {
+//		assert.that(ofertaCredito.satisfaceConsumo(consumoInternet))
+//	}
+//	
+//	test "llamdas gratis"{
+//		assert.that(llamadasGratis.satisfaceConsumo(consumoMinutos))
+//	}
+//	
+//	test "llamdas gratis no cubre internet"{
+//		assert.notThat(llamadasGratis.satisfaceConsumo(consumoInternet))
+//	}
+//	
+//
+//}
+//
+//describe "lineas"{
+//	
+//		
+//}
+//
