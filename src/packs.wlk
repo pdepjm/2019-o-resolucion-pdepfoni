@@ -7,7 +7,7 @@ class Pack {
 	method acabado()
 
 	method puedeSatisfacer(consumo) = not vigencia.vencido() && self.cubre(consumo)
-	
+
 	method cubre(consumo)
 
 }
@@ -15,17 +15,15 @@ class Pack {
 class PackConsumible inherits Pack {
 
 	const property cantidad
-	var cantidadConsumida = 0
+	const consumos = []
 
 	method consumir(consumo) {
-		self.consumirCantidad(consumo.cantidad())
+		consumos.add(consumo)
 	}
 
-	method consumirCantidad(_cantidad) {
-		cantidadConsumida += _cantidad
-	}
+	method cantidadConsumida() = consumos.sum({ consumo => consumo.cantidad() })
 
-	method remanente() = cantidad - cantidadConsumida
+	method remanente() = cantidad - self.cantidadConsumida()
 
 	override method acabado() = self.remanente() <= 0
 
@@ -78,11 +76,16 @@ class InternetLibreLosFindes inherits PackIlimitado {
 
 //Vigencias
 object ilimitado {
+
 	method vencido() = false
+
 }
 
 class Vencimiento {
+
 	const fecha
-	
+
 	method vencido() = fecha < new Date()
+
 }
+
