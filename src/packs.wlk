@@ -1,14 +1,14 @@
 class Pack {
 
-	var vencimiento = new Date()
+	const vigencia = ilimitado
 
-	method esInutil() = self.vencido() || self.acabado()
+	method esInutil() = vigencia.vencido() || self.acabado()
 
 	method acabado()
 
-	method vencido() = vencimiento < new Date()
-
-	method puedeSatisfacer(consumo)
+	method puedeSatisfacer(consumo) = not vigencia.vencido() && self.cubre(consumo)
+	
+	method cubre(consumo)
 
 }
 
@@ -33,13 +33,13 @@ class PackConsumible inherits Pack {
 
 class Credito inherits PackConsumible {
 
-	override method puedeSatisfacer(consumo) = consumo.costo() <= self.remanente()
+	override method cubre(consumo) = consumo.costo() <= self.remanente()
 
 }
 
 class MBsLibres inherits PackConsumible {
 
-	override method puedeSatisfacer(consumo) = consumo.cubiertoPorInternet(self)
+	override method cubre(consumo) = consumo.cubiertoPorInternet(self)
 
 	method puedeGastarMB(cantidad) = cantidad <= self.remanente()
 
@@ -66,13 +66,23 @@ class PackIlimitado inherits Pack {
 
 class LlamadasGratis inherits PackIlimitado {
 
-	method satisfaceConsumo(consumo) = consumo.cubiertoPorLlamadas(self)
+	override method cubre(consumo) = consumo.cubiertoPorLlamadas(self)
 
 }
 
 class InternetLibreLosFindes inherits PackIlimitado {
 
-	method satisfaceConsumo(consumo) = consumo.cubiertoPorInternet(self) && consumo.fechaRealizado().internalDayOfWeek() > 5
+	override method cubre(consumo) = consumo.cubiertoPorInternet(self) && consumo.fechaRealizado().internalDayOfWeek() > 5
 
 }
 
+//Vigencias
+object ilimitado {
+	method vencido() = false
+}
+
+class Vencimiento {
+	const fecha
+	
+	method vencido() = fecha < new Date()
+}

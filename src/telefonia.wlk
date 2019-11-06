@@ -2,8 +2,8 @@ class Linea {
 
 	const packs = []
 	const consumos = []
-	var tipoLinea = comun
-	var deuda = 0
+	var property tipoLinea = comun
+	var property deuda = 0
 
 	method gastoMBUltimoMes() = self.gastosEntre(new Date().minusDays(3), new Date()).sum({ consumo => consumo.cantidadMB() })
 
@@ -15,13 +15,10 @@ class Linea {
 		packs.add(nuevoPack)
 	}
 
-	method sePuedeRealizarConsumo(consumo) = packs.any({ pack => pack.puedeSatisfacer(consumo) })
+	method puedeRealizarConsumo(consumo) = packs.any({ pack => pack.puedeSatisfacer(consumo) })
 
 	method realizarConsumo(consumo) {
-		if (not self.sePuedeRealizarConsumo(consumo)) 
-			tipoLinea.accionConsumoNoRealizable(self, consumo) 
-		else 
-			self.consumirPack(consumo)
+		if (not self.puedeRealizarConsumo(consumo)) tipoLinea.accionConsumoNoRealizable(self, consumo) else self.consumirPack(consumo)
 	}
 
 	method consumirPack(consumo) {
@@ -43,7 +40,6 @@ class Linea {
 object platinum {
 
 	method accionConsumoNoRealizable(linea, consumo) {
-		linea.sumarDeuda(consumo.costo())
 	}
 
 }
@@ -51,6 +47,7 @@ object platinum {
 object black {
 
 	method accionConsumoNoRealizable(linea, consumo) {
+		linea.sumarDeuda(consumo.costo())
 	}
 
 }
