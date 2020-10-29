@@ -5,7 +5,7 @@ class Linea {
 	var property tipoLinea = comun
 	var property deuda = 0
 
-	method gastoMBUltimoMes() = self.gastosEntre(new Date().minusDays(3), new Date()).sum({ consumo => consumo.cantidadMB() })
+	method gastoMBUltimoMes() = self.gastosEntre(new Date().minusMonths(1), new Date()).sum({ consumo => consumo.cantidadMB() })
 
 	method gastosEntre(min, max) = consumos.filter({ consumo => consumo.consumidoEntre(min, max) })
 
