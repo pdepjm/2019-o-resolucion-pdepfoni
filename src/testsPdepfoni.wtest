@@ -5,9 +5,12 @@ import packs.*
 const consumoLlamada = new ConsumoLlamada(segundos = 150)
 const consumoLlamadaLarga = new ConsumoLlamada(segundos = 99999)
 const consumoInternet = new ConsumoInternet(cantidadMB = 5)
-const packMBLibres = new MBsLibres(cantidad = 10)
-const packCredito = new Credito(cantidad = 50)
-const packLlamadasGratisVencido = new LlamadasGratis(vigencia = new Vencimiento(fecha = new Date().minusDays(1)))
+const packMBLibres = new Internet(tipoGasto = new Consumible(cantidad = 10))
+const packCredito = new Credito(tipoGasto = new Consumible(cantidad = 50))
+const packLlamadasGratisVencido = new Llamadas(
+	vigencia = new Vencimiento(fecha = new Date().minusDays(1)),
+	tipoGasto = ilimitado
+)
 const linea = new Linea()
 
 describe "Consumos" {
